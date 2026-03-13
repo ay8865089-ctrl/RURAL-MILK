@@ -1,0 +1,1271 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>RURAL MILK — Future Pure</title>
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Rajdhani:wght@300;400;600&family=Playfair+Display:ital,wght@1,700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --black:#04060A;
+  --deep:#080C12;
+  --panel:#0D1219;
+  --gold:#C8943A;
+  --gold2:#E8B86D;
+  --gold3:#FDD98A;
+  --cream:#F5ECD7;
+  --cream2:#D4C4A0;
+  --teal:#00FFD1;
+  --teal2:rgba(0,255,209,0.15);
+  --amber:#FFB347;
+  --scan:rgba(0,255,209,0.03);
+  --holo1:#00FFD1;
+  --holo2:#C8943A;
+}
+*,*::before,*::after{margin:0;padding:0;box-sizing:border-box;}
+html{scroll-behavior:smooth;}
+body{
+  background:var(--black);
+  color:var(--cream);
+  font-family:'Rajdhani',sans-serif;
+  overflow-x:hidden;
+  cursor:none;
+}
+
+/* ── SCANLINES ── */
+body::after{
+  content:'';
+  position:fixed;inset:0;
+  background:repeating-linear-gradient(
+    0deg,
+    transparent,transparent 2px,
+    rgba(0,255,209,0.015) 2px,rgba(0,255,209,0.015) 4px
+  );
+  pointer-events:none;z-index:9800;
+}
+
+/* ── CURSOR ── */
+#cur{position:fixed;width:10px;height:10px;background:var(--teal);border-radius:50%;pointer-events:none;z-index:9999;mix-blend-mode:screen;transition:width .15s,height .15s;}
+#cur-ring{position:fixed;width:34px;height:34px;border:1px solid rgba(0,255,209,.5);border-radius:50%;pointer-events:none;z-index:9998;transition:transform .35s ease;}
+#cur-cross-h,#cur-cross-v{position:fixed;background:rgba(0,255,209,.25);pointer-events:none;z-index:9997;}
+#cur-cross-h{width:50px;height:1px;margin-top:0;}
+#cur-cross-v{width:1px;height:50px;}
+
+/* ── CANVAS BG ── */
+#particleCanvas{position:fixed;inset:0;z-index:0;pointer-events:none;}
+
+/* ── NAV ── */
+nav{
+  position:fixed;top:0;left:0;right:0;z-index:1000;
+  padding:20px 60px;
+  display:flex;align-items:center;justify-content:space-between;
+  background:linear-gradient(to bottom,rgba(4,6,10,.98),transparent);
+  border-bottom:1px solid rgba(0,255,209,.08);
+}
+.logo{
+  font-family:'Orbitron',sans-serif;
+  font-size:18px;font-weight:900;letter-spacing:.2em;
+  color:var(--gold2);
+  position:relative;
+}
+.logo::before{
+  content:'RURAL MILK';
+  position:absolute;inset:0;
+  color:var(--teal);
+  clip-path:polygon(0 30%,100% 30%,100% 50%,0 50%);
+  animation:logoGlitch 6s infinite;
+  opacity:.7;
+}
+@keyframes logoGlitch{
+  0%,92%,100%{transform:translateX(0);opacity:0;}
+  93%{transform:translateX(-3px);opacity:.6;}
+  95%{transform:translateX(3px);opacity:.4;}
+  97%{transform:translateX(-2px);opacity:.5;}
+  99%{transform:translateX(0);opacity:0;}
+}
+.nav-links{display:flex;gap:36px;list-style:none;}
+.nav-links a{
+  color:rgba(212,196,160,.6);font-size:12px;font-weight:600;
+  text-decoration:none;letter-spacing:.18em;text-transform:uppercase;
+  transition:color .3s;position:relative;
+}
+.nav-links a::after{content:'';position:absolute;bottom:-4px;left:0;width:0;height:1px;background:var(--teal);transition:width .3s;}
+.nav-links a:hover{color:var(--teal);}
+.nav-links a:hover::after{width:100%;}
+.nav-cta{
+  font-family:'Orbitron',sans-serif;
+  font-size:11px;font-weight:700;letter-spacing:.15em;
+  color:var(--black);background:var(--teal);
+  border:none;border-radius:2px;padding:10px 24px;
+  cursor:none;transition:all .3s;
+  box-shadow:0 0 20px rgba(0,255,209,.3);
+}
+.nav-cta:hover{background:var(--gold2);box-shadow:0 0 30px rgba(232,184,109,.4);transform:translateY(-1px);}
+
+/* ── HERO ── */
+.hero{
+  min-height:100vh;display:flex;align-items:center;
+  position:relative;overflow:hidden;
+  padding:120px 60px 80px;
+}
+
+/* HEX GRID */
+.hex-grid{
+  position:absolute;inset:0;z-index:1;
+  background-image:
+    linear-gradient(rgba(0,255,209,.04) 1px,transparent 1px),
+    linear-gradient(90deg,rgba(0,255,209,.04) 1px,transparent 1px);
+  background-size:60px 60px;
+  mask-image:radial-gradient(ellipse 70% 70% at 70% 50%,black 0%,transparent 100%);
+}
+
+/* HOLO ORBS */
+.holo-orb{
+  position:absolute;border-radius:50%;
+  mix-blend-mode:screen;pointer-events:none;
+}
+.orb1{
+  width:600px;height:600px;
+  right:-100px;top:50%;transform:translateY(-50%);
+  background:radial-gradient(circle,rgba(200,148,58,.18) 0%,rgba(0,255,209,.06) 40%,transparent 70%);
+  animation:orbPulse 5s ease-in-out infinite;
+}
+.orb2{
+  width:300px;height:300px;
+  right:100px;top:20%;
+  background:radial-gradient(circle,rgba(0,255,209,.12) 0%,transparent 70%);
+  animation:orbPulse 3s ease-in-out infinite reverse;
+}
+@keyframes orbPulse{
+  0%,100%{transform:translateY(-50%) scale(1);}
+  50%{transform:translateY(-50%) scale(1.08);}
+}
+
+/* ROTATING RING */
+.ring-wrap{
+  position:absolute;right:8%;top:50%;transform:translateY(-50%);
+  width:440px;height:440px;
+}
+.holo-ring{
+  position:absolute;inset:0;border-radius:50%;
+  border:1px solid transparent;
+  animation:spinRing 12s linear infinite;
+}
+.holo-ring:nth-child(1){
+  border-image:none;
+  border-color:rgba(0,255,209,.25);
+  box-shadow:inset 0 0 40px rgba(0,255,209,.04),0 0 20px rgba(0,255,209,.08);
+}
+.holo-ring:nth-child(2){
+  inset:40px;
+  border-top-color:var(--gold);border-right-color:transparent;
+  border-bottom-color:var(--gold);border-left-color:transparent;
+  animation-duration:8s;animation-direction:reverse;
+}
+.holo-ring:nth-child(3){
+  inset:90px;
+  border-top-color:rgba(0,255,209,.6);border-right-color:rgba(0,255,209,.6);
+  border-bottom-color:transparent;border-left-color:transparent;
+  animation-duration:5s;
+}
+@keyframes spinRing{to{transform:rotate(360deg);}}
+
+/* MILK HOLOGRAM */
+.milk-holo{
+  position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);
+  width:160px;height:200px;
+}
+.milk-holo svg{width:100%;height:100%;filter:drop-shadow(0 0 20px rgba(0,255,209,.6)) drop-shadow(0 0 60px rgba(200,148,58,.3));}
+.milk-holo-scan{
+  position:absolute;inset:0;
+  background:linear-gradient(to bottom,transparent 0%,rgba(0,255,209,.15) 50%,transparent 100%);
+  animation:holoScan 2s linear infinite;
+}
+@keyframes holoScan{
+  from{transform:translateY(-100%);}
+  to{transform:translateY(100%);}
+}
+
+/* DATA LINES */
+.data-lines{
+  position:absolute;right:calc(8% + 220px);top:50%;transform:translateY(-50%);
+  display:flex;flex-direction:column;gap:8px;
+}
+.data-line{
+  display:flex;align-items:center;gap:8px;
+  font-family:'Orbitron',sans-serif;font-size:9px;
+  color:rgba(0,255,209,.5);letter-spacing:.1em;
+  animation:dataFlicker 3s ease-in-out infinite;
+}
+.data-line::before{content:'';width:30px;height:1px;background:rgba(0,255,209,.3);}
+@keyframes dataFlicker{
+  0%,90%,100%{opacity:.5;}
+  95%{opacity:1;}
+}
+
+/* HERO CONTENT */
+.hero-content{position:relative;z-index:2;max-width:580px;}
+.hero-tag{
+  display:inline-flex;align-items:center;gap:10px;
+  font-family:'Orbitron',sans-serif;font-size:10px;
+  letter-spacing:.25em;color:var(--teal);
+  border:1px solid rgba(0,255,209,.3);
+  padding:7px 18px;border-radius:2px;
+  margin-bottom:32px;
+  animation:fadeUp 1s ease both;
+  position:relative;overflow:hidden;
+}
+.hero-tag::before{
+  content:'';position:absolute;left:-100%;top:0;bottom:0;width:100%;
+  background:linear-gradient(90deg,transparent,rgba(0,255,209,.1),transparent);
+  animation:tagShine 3s ease infinite;
+}
+@keyframes tagShine{to{left:200%;}}
+.tag-dot{width:6px;height:6px;background:var(--teal);border-radius:50%;animation:blink 1.2s ease infinite;}
+@keyframes blink{0%,100%{opacity:1;}50%{opacity:.2;};}
+
+.hero-title{
+  font-family:'Orbitron',sans-serif;
+  font-size:clamp(38px,6vw,72px);
+  font-weight:900;line-height:1.05;
+  margin-bottom:8px;
+  animation:fadeUp 1s ease .15s both;
+}
+.hero-title .line1{color:var(--cream);display:block;}
+.hero-title .line2{
+  display:block;
+  background:linear-gradient(135deg,var(--gold2),var(--teal));
+  -webkit-background-clip:text;-webkit-text-fill-color:transparent;
+  background-clip:text;
+  position:relative;
+}
+.hero-title .line3{
+  font-family:'Playfair Display',serif;
+  font-style:italic;color:var(--gold2);display:block;font-size:.7em;
+}
+
+/* GLITCH TEXT */
+.glitch{position:relative;}
+.glitch::before,.glitch::after{
+  content:attr(data-text);
+  position:absolute;inset:0;
+  background:linear-gradient(135deg,var(--gold2),var(--teal));
+  -webkit-background-clip:text;-webkit-text-fill-color:transparent;
+  background-clip:text;
+}
+.glitch::before{animation:glitchTop 4s infinite;clip-path:polygon(0 0,100% 0,100% 35%,0 35%);}
+.glitch::after{animation:glitchBot 4s infinite;clip-path:polygon(0 65%,100% 65%,100% 100%,0 100%);}
+@keyframes glitchTop{
+  0%,85%,100%{transform:none;opacity:0;}
+  86%{transform:translate(-3px,0);opacity:.8;}
+  88%{transform:translate(3px,0);opacity:.6;}
+  90%{transform:none;opacity:0;}
+}
+@keyframes glitchBot{
+  0%,88%,100%{transform:none;opacity:0;}
+  89%{transform:translate(4px,0);opacity:.7;}
+  91%{transform:translate(-2px,0);opacity:.5;}
+  93%{transform:none;opacity:0;}
+}
+
+.hero-sub{
+  font-size:15px;line-height:1.9;color:var(--cream2);font-weight:300;
+  max-width:420px;margin-bottom:48px;
+  animation:fadeUp 1s ease .3s both;letter-spacing:.04em;
+}
+.hero-btns{display:flex;gap:16px;flex-wrap:wrap;animation:fadeUp 1s ease .45s both;}
+
+.btn-primary{
+  font-family:'Orbitron',sans-serif;
+  font-size:11px;font-weight:700;letter-spacing:.18em;
+  color:var(--black);background:var(--teal);
+  border:none;border-radius:2px;padding:15px 36px;
+  cursor:none;transition:all .3s;position:relative;overflow:hidden;
+  box-shadow:0 0 30px rgba(0,255,209,.35);
+}
+.btn-primary::after{content:'';position:absolute;inset:0;background:linear-gradient(45deg,transparent 40%,rgba(255,255,255,.2) 50%,transparent 60%);transform:translateX(-100%);transition:transform .5s;}
+.btn-primary:hover::after{transform:translateX(100%);}
+.btn-primary:hover{background:var(--gold2);box-shadow:0 0 40px rgba(232,184,109,.5);color:var(--black);}
+
+.btn-ghost{
+  font-family:'Orbitron',sans-serif;
+  font-size:11px;font-weight:700;letter-spacing:.18em;
+  color:var(--teal);background:transparent;
+  border:1px solid rgba(0,255,209,.4);border-radius:2px;padding:15px 36px;
+  cursor:none;transition:all .3s;
+}
+.btn-ghost:hover{background:rgba(0,255,209,.08);border-color:var(--teal);}
+
+@keyframes fadeUp{from{opacity:0;transform:translateY(28px);}to{opacity:1;transform:translateY(0);}}
+
+/* SCROLL LINE */
+.scroll-hint{
+  position:absolute;bottom:36px;left:60px;z-index:2;
+  display:flex;align-items:center;gap:12px;
+  font-family:'Orbitron',sans-serif;font-size:9px;letter-spacing:.2em;
+  color:rgba(0,255,209,.35);
+  animation:fadeUp 1s ease 1s both;
+}
+.scroll-pulse{width:1px;height:40px;background:linear-gradient(to bottom,transparent,var(--teal));animation:scrollPulse 2s ease-in-out infinite;}
+@keyframes scrollPulse{0%,100%{transform:scaleY(.3);opacity:.3;}50%{transform:scaleY(1);opacity:1;}}
+
+/* ── HUD STATS ── */
+.hud-stats{
+  position:relative;z-index:2;
+  background:var(--deep);
+  border-top:1px solid rgba(0,255,209,.12);
+  border-bottom:1px solid rgba(0,255,209,.12);
+  padding:0 60px;
+  display:flex;align-items:stretch;
+}
+.hud-item{
+  flex:1;padding:28px 20px;text-align:center;
+  border-right:1px solid rgba(0,255,209,.08);
+  position:relative;overflow:hidden;
+  transition:background .3s;
+}
+.hud-item:last-child{border-right:none;}
+.hud-item:hover{background:rgba(0,255,209,.03);}
+.hud-item::before{
+  content:'';position:absolute;top:0;left:0;right:0;height:1px;
+  background:linear-gradient(to right,transparent,var(--teal),transparent);
+  transform:scaleX(0);transition:transform .4s;
+}
+.hud-item:hover::before{transform:scaleX(1);}
+.hud-val{
+  font-family:'Orbitron',sans-serif;font-size:30px;font-weight:900;
+  color:var(--gold2);display:block;
+  text-shadow:0 0 20px rgba(232,184,109,.4);
+}
+.hud-label{
+  font-size:10px;font-weight:600;letter-spacing:.2em;text-transform:uppercase;
+  color:rgba(0,255,209,.5);margin-top:6px;display:block;
+}
+
+/* ── SECTION BASE ── */
+.section{padding:100px 60px;position:relative;z-index:2;}
+.s-tag{
+  font-family:'Orbitron',sans-serif;font-size:10px;letter-spacing:.25em;
+  text-transform:uppercase;color:var(--teal);margin-bottom:12px;
+  display:flex;align-items:center;gap:10px;
+}
+.s-tag::before{content:'';width:20px;height:1px;background:var(--teal);}
+.s-title{
+  font-family:'Orbitron',sans-serif;
+  font-size:clamp(28px,4vw,48px);font-weight:900;
+  line-height:1.1;margin-bottom:60px;letter-spacing:.05em;
+}
+.s-title em{
+  font-family:'Playfair Display',serif;
+  font-style:italic;color:var(--gold2);font-size:1.1em;
+}
+
+/* ── PRODUCTS ── */
+.products-grid{
+  display:grid;
+  grid-template-columns:repeat(auto-fill,minmax(250px,1fr));
+  gap:2px;
+}
+.p-card{
+  background:var(--panel);
+  border:1px solid rgba(0,255,209,.08);
+  padding:36px 28px;
+  position:relative;overflow:hidden;
+  transition:all .4s;cursor:none;
+}
+.p-card::before{
+  content:'';position:absolute;inset:0;
+  background:linear-gradient(135deg,rgba(0,255,209,.04) 0%,transparent 60%);
+  opacity:0;transition:opacity .4s;
+}
+.p-card::after{
+  content:'';position:absolute;top:0;left:0;right:0;height:2px;
+  background:linear-gradient(to right,var(--teal),var(--gold2));
+  transform:scaleX(0);transform-origin:left;transition:transform .4s;
+}
+.p-card:hover{transform:translateY(-4px);border-color:rgba(0,255,209,.25);box-shadow:0 20px 60px rgba(0,0,0,.5),0 0 30px rgba(0,255,209,.06);}
+.p-card:hover::before{opacity:1;}
+.p-card:hover::after{transform:scaleX(1);}
+
+/* corner brackets */
+.p-card .corner{position:absolute;width:16px;height:16px;border-color:rgba(0,255,209,.3);border-style:solid;}
+.p-card .corner.tl{top:8px;left:8px;border-width:1px 0 0 1px;}
+.p-card .corner.tr{top:8px;right:8px;border-width:1px 1px 0 0;}
+.p-card .corner.bl{bottom:8px;left:8px;border-width:0 0 1px 1px;}
+.p-card .corner.br{bottom:8px;right:8px;border-width:0 1px 1px 0;}
+
+.p-icon{
+  width:70px;height:70px;
+  background:rgba(0,255,209,.06);
+  border:1px solid rgba(0,255,209,.15);
+  border-radius:2px;
+  display:flex;align-items:center;justify-content:center;
+  font-size:30px;margin-bottom:24px;
+  position:relative;
+}
+.p-icon::after{
+  content:'';position:absolute;inset:0;
+  background:linear-gradient(135deg,rgba(0,255,209,.1),transparent);
+  animation:iconShimmer 3s ease-in-out infinite;
+}
+@keyframes iconShimmer{0%,100%{opacity:0;}50%{opacity:1;}}
+
+.p-badge{
+  position:absolute;top:16px;right:16px;
+  font-family:'Orbitron',sans-serif;font-size:8px;letter-spacing:.15em;
+  color:var(--teal);border:1px solid rgba(0,255,209,.3);
+  padding:3px 8px;
+}
+.p-name{
+  font-family:'Orbitron',sans-serif;font-size:14px;font-weight:700;
+  letter-spacing:.1em;margin-bottom:10px;color:var(--cream);
+}
+.p-desc{font-size:13px;line-height:1.7;color:var(--cream2);margin-bottom:20px;font-weight:300;}
+.p-price{
+  font-family:'Orbitron',sans-serif;font-size:22px;font-weight:900;
+  color:var(--gold2);margin-bottom:20px;
+  text-shadow:0 0 15px rgba(232,184,109,.3);
+}
+.p-price sup{font-size:12px;color:var(--cream2);}
+.p-price sub{font-size:11px;color:rgba(212,196,160,.5);}
+.btn-add{
+  width:100%;
+  font-family:'Orbitron',sans-serif;font-size:10px;font-weight:700;letter-spacing:.15em;
+  color:var(--teal);background:rgba(0,255,209,.06);
+  border:1px solid rgba(0,255,209,.25);
+  padding:12px;cursor:none;transition:all .3s;
+  position:relative;overflow:hidden;
+}
+.btn-add::before{content:'';position:absolute;inset:0;background:var(--teal);transform:scaleX(0);transform-origin:left;transition:transform .3s;z-index:0;}
+.btn-add span{position:relative;z-index:1;transition:color .3s;}
+.btn-add:hover::before{transform:scaleX(1);}
+.btn-add:hover span{color:var(--black);}
+
+/* ── WHY ── */
+.why-section{
+  background:var(--deep);
+  border-top:1px solid rgba(0,255,209,.07);
+  border-bottom:1px solid rgba(0,255,209,.07);
+  padding:100px 60px;position:relative;z-index:2;overflow:hidden;
+}
+.why-bg-text{
+  position:absolute;right:-40px;top:50%;transform:translateY(-50%);
+  font-family:'Orbitron',sans-serif;font-size:180px;font-weight:900;
+  color:rgba(0,255,209,.025);letter-spacing:-.05em;
+  user-select:none;white-space:nowrap;
+}
+.why-grid{display:grid;grid-template-columns:1fr 1fr;gap:80px;align-items:center;}
+.why-visual{position:relative;height:420px;}
+
+/* Radar sweep */
+.radar{
+  position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);
+  width:360px;height:360px;
+}
+.radar-ring{
+  position:absolute;border-radius:50%;
+  border:1px solid rgba(0,255,209,.15);
+}
+.rr1{inset:0;}
+.rr2{inset:60px;}
+.rr3{inset:120px;}
+.rr4{inset:180px;background:rgba(0,255,209,.03);}
+.radar-cross{position:absolute;inset:0;}
+.radar-cross::before{content:'';position:absolute;left:0;right:0;top:50%;height:1px;background:rgba(0,255,209,.1);}
+.radar-cross::after{content:'';position:absolute;top:0;bottom:0;left:50%;width:1px;background:rgba(0,255,209,.1);}
+.radar-sweep{
+  position:absolute;inset:0;border-radius:50%;overflow:hidden;
+}
+.sweep-arm{
+  position:absolute;top:50%;left:50%;width:50%;height:1px;transform-origin:left center;
+  background:linear-gradient(to right,rgba(0,255,209,.8),transparent);
+  animation:sweepRotate 3s linear infinite;
+}
+.sweep-glow{
+  position:absolute;top:50%;left:50%;
+  transform:translate(-50%,-50%);
+  width:100%;height:100%;
+  background:conic-gradient(from 0deg,rgba(0,255,209,.08) 0deg,transparent 60deg);
+  animation:sweepRotate 3s linear infinite;
+  border-radius:50%;
+}
+@keyframes sweepRotate{to{transform:rotate(360deg);}}
+
+.radar-dot{
+  position:absolute;width:8px;height:8px;border-radius:50%;
+  background:var(--teal);
+  box-shadow:0 0 10px var(--teal);
+  animation:dotPing 2s ease-in-out infinite;
+}
+.rd1{top:20%;left:65%;}
+.rd2{top:60%;left:25%;animation-delay:.7s;}
+.rd3{top:40%;left:70%;animation-delay:1.4s;}
+@keyframes dotPing{
+  0%,100%{transform:scale(1);opacity:1;}
+  50%{transform:scale(1.5);opacity:.5;}
+}
+
+.why-items{display:flex;flex-direction:column;gap:28px;}
+.why-item{
+  display:flex;gap:20px;align-items:flex-start;
+  padding:20px;border:1px solid rgba(0,255,209,.07);
+  background:rgba(0,255,209,.02);
+  position:relative;overflow:hidden;transition:all .3s;
+}
+.why-item::before{content:'';position:absolute;left:0;top:0;bottom:0;width:2px;background:linear-gradient(to bottom,var(--teal),var(--gold));transform:scaleY(0);transition:transform .3s;transform-origin:top;}
+.why-item:hover::before{transform:scaleY(1);}
+.why-item:hover{border-color:rgba(0,255,209,.2);}
+.wi-num{
+  font-family:'Orbitron',sans-serif;font-size:10px;font-weight:900;
+  color:rgba(0,255,209,.3);letter-spacing:.1em;min-width:30px;padding-top:2px;
+}
+.wi-body h3{font-size:15px;font-weight:600;color:var(--cream);margin-bottom:5px;letter-spacing:.05em;}
+.wi-body p{font-size:13px;line-height:1.7;color:var(--cream2);font-weight:300;}
+
+/* ── PROCESS ── */
+.process-section{padding:100px 60px;position:relative;z-index:2;}
+.process-grid{
+  display:grid;grid-template-columns:repeat(4,1fr);
+  gap:2px;margin-top:60px;
+}
+.proc-step{
+  background:var(--panel);
+  border:1px solid rgba(0,255,209,.08);
+  padding:36px 24px;text-align:center;
+  position:relative;overflow:hidden;transition:all .3s;
+}
+.proc-step:hover{border-color:rgba(0,255,209,.3);background:rgba(0,255,209,.03);}
+.proc-num{
+  font-family:'Orbitron',sans-serif;font-size:9px;letter-spacing:.2em;
+  color:rgba(0,255,209,.35);margin-bottom:16px;
+}
+.proc-icon{
+  font-size:32px;margin-bottom:16px;display:block;
+  filter:drop-shadow(0 0 8px rgba(0,255,209,.3));
+}
+.proc-title{
+  font-family:'Orbitron',sans-serif;font-size:12px;font-weight:700;
+  letter-spacing:.12em;color:var(--cream);margin-bottom:10px;
+}
+.proc-desc{font-size:12px;line-height:1.7;color:var(--cream2);}
+.proc-step::after{
+  content:'';position:absolute;bottom:0;left:0;right:0;height:2px;
+  background:linear-gradient(to right,var(--teal),var(--gold2));
+  transform:scaleX(0);transition:transform .4s;transform-origin:left;
+}
+.proc-step:hover::after{transform:scaleX(1);}
+
+/* connector arrows */
+.proc-step:not(:last-child)::before{
+  content:'›';
+  position:absolute;right:-12px;top:50%;transform:translateY(-50%);
+  font-size:20px;color:rgba(0,255,209,.3);z-index:10;
+}
+
+/* ── TESTIMONIALS ── */
+.testi-section{
+  background:var(--deep);padding:80px 60px;
+  border-top:1px solid rgba(0,255,209,.07);
+  position:relative;z-index:2;
+}
+.testi-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:2px;margin-top:48px;}
+.testi-card{
+  background:var(--panel);border:1px solid rgba(0,255,209,.07);
+  padding:28px;position:relative;overflow:hidden;
+}
+.testi-card::before{
+  content:'"';
+  position:absolute;top:-10px;right:20px;
+  font-family:'Playfair Display',serif;font-size:120px;font-style:italic;
+  color:rgba(0,255,209,.04);line-height:1;
+}
+.testi-stars{
+  font-size:12px;color:var(--gold2);letter-spacing:4px;margin-bottom:14px;
+  text-shadow:0 0 10px rgba(232,184,109,.4);
+}
+.testi-text{
+  font-size:13px;line-height:1.8;color:var(--cream2);
+  margin-bottom:20px;font-style:italic;font-weight:300;
+}
+.testi-name{font-size:13px;font-weight:600;color:var(--cream);letter-spacing:.05em;}
+.testi-loc{font-size:10px;color:var(--teal);margin-top:3px;letter-spacing:.1em;}
+
+/* ── FOOTER ── */
+footer{
+  padding:48px 60px;
+  border-top:1px solid rgba(0,255,209,.1);
+  display:flex;justify-content:space-between;align-items:center;
+  flex-wrap:wrap;gap:20px;
+  position:relative;z-index:2;
+  background:var(--deep);
+}
+.f-logo{
+  font-family:'Orbitron',sans-serif;font-size:16px;font-weight:900;
+  color:var(--gold2);letter-spacing:.2em;
+}
+.f-copy{font-size:11px;color:rgba(0,255,209,.3);letter-spacing:.1em;}
+.f-links{display:flex;gap:24px;}
+.f-links a{font-size:11px;color:rgba(212,196,160,.4);letter-spacing:.12em;text-decoration:none;transition:color .3s;}
+.f-links a:hover{color:var(--teal);}
+
+/* ── ASSISTANT ── */
+#assist-btn{
+  position:fixed;bottom:28px;right:28px;
+  width:58px;height:58px;
+  background:linear-gradient(135deg,var(--teal),var(--gold));
+  border:none;border-radius:2px;
+  display:flex;align-items:center;justify-content:center;
+  font-size:22px;cursor:none;z-index:2000;
+  box-shadow:0 0 30px rgba(0,255,209,.4);
+  animation:assistGlow 2s ease-in-out infinite;
+  transition:transform .2s;
+}
+#assist-btn:hover{transform:scale(1.08);}
+@keyframes assistGlow{
+  0%,100%{box-shadow:0 0 20px rgba(0,255,209,.3);}
+  50%{box-shadow:0 0 40px rgba(0,255,209,.6),0 0 80px rgba(200,148,58,.2);}
+}
+
+#assist-panel{
+  position:fixed;bottom:100px;right:28px;
+  width:360px;
+  background:var(--deep);
+  border:1px solid rgba(0,255,209,.2);
+  z-index:2000;
+  display:none;flex-direction:column;
+  box-shadow:0 0 60px rgba(0,255,209,.1),0 30px 80px rgba(0,0,0,.7);
+  animation:panelIn .3s ease;
+}
+@keyframes panelIn{from{opacity:0;transform:translateY(12px) scale(.97);}to{opacity:1;transform:none;}}
+#assist-panel.open{display:flex;}
+
+/* scanline on panel */
+#assist-panel::after{
+  content:'';pointer-events:none;
+  position:absolute;inset:0;
+  background:repeating-linear-gradient(0deg,transparent,transparent 3px,rgba(0,255,209,.02) 3px,rgba(0,255,209,.02) 4px);
+  z-index:10;
+}
+
+.a-head{
+  padding:14px 18px;
+  background:linear-gradient(135deg,rgba(0,255,209,.08),rgba(200,148,58,.05));
+  border-bottom:1px solid rgba(0,255,209,.12);
+  display:flex;align-items:center;gap:12px;
+}
+.a-avatar{
+  width:38px;height:38px;
+  background:linear-gradient(135deg,var(--teal),var(--gold));
+  display:flex;align-items:center;justify-content:center;
+  font-size:18px;flex-shrink:0;position:relative;
+}
+.a-avatar::before{
+  content:'';position:absolute;inset:-2px;
+  border:1px solid rgba(0,255,209,.4);
+  animation:avRing 2s linear infinite;
+}
+@keyframes avRing{to{transform:rotate(360deg);}}
+.a-name{
+  font-family:'Orbitron',sans-serif;font-size:11px;font-weight:700;
+  letter-spacing:.15em;color:var(--teal);
+}
+.a-status{
+  font-size:10px;color:rgba(212,196,160,.5);
+  display:flex;align-items:center;gap:5px;margin-top:2px;letter-spacing:.08em;
+}
+.a-dot{width:5px;height:5px;background:#00FF88;border-radius:50%;animation:blink 1.5s infinite;}
+
+.a-msgs{
+  flex:1;overflow-y:auto;padding:14px;
+  display:flex;flex-direction:column;gap:10px;
+  max-height:290px;scroll-behavior:smooth;
+}
+.a-msgs::-webkit-scrollbar{width:3px;}
+.a-msgs::-webkit-scrollbar-thumb{background:rgba(0,255,209,.2);}
+
+.msg{
+  max-width:88%;font-size:13px;line-height:1.6;
+  padding:10px 14px;
+  animation:msgIn .2s ease;font-weight:300;
+}
+@keyframes msgIn{from{opacity:0;transform:translateY(6px);}to{opacity:1;transform:none;}}
+.msg.bot{
+  background:rgba(0,255,209,.06);
+  border:1px solid rgba(0,255,209,.15);
+  border-bottom-left-radius:0;
+  color:var(--cream);align-self:flex-start;
+}
+.msg.user{
+  background:linear-gradient(135deg,var(--gold),var(--gold2));
+  color:var(--black);font-weight:600;
+  border-bottom-right-radius:0;align-self:flex-end;
+}
+
+.a-chips{padding:8px 14px 4px;display:flex;flex-wrap:wrap;gap:6px;}
+.chip{
+  font-family:'Orbitron',sans-serif;font-size:9px;font-weight:700;
+  letter-spacing:.12em;color:var(--teal);
+  background:rgba(0,255,209,.06);
+  border:1px solid rgba(0,255,209,.2);
+  padding:6px 12px;cursor:none;transition:all .2s;
+}
+.chip:hover{background:rgba(0,255,209,.15);border-color:var(--teal);}
+
+.a-input-row{
+  padding:10px 14px;
+  display:flex;gap:8px;
+  border-top:1px solid rgba(0,255,209,.1);
+}
+.a-input{
+  flex:1;
+  background:rgba(0,255,209,.04);
+  border:1px solid rgba(0,255,209,.15);
+  color:var(--cream);font-family:'Rajdhani',sans-serif;font-size:13px;
+  padding:8px 14px;outline:none;cursor:text;
+}
+.a-input::placeholder{color:rgba(0,255,209,.25);}
+.a-input:focus{border-color:rgba(0,255,209,.4);}
+.a-send{
+  width:36px;height:36px;
+  background:var(--teal);border:none;
+  display:flex;align-items:center;justify-content:center;
+  font-size:14px;cursor:none;flex-shrink:0;
+  color:var(--black);font-weight:900;
+  transition:all .2s;
+}
+.a-send:hover{background:var(--gold2);}
+
+/* ── TYPING INDICATOR ── */
+.typing{display:flex;gap:4px;padding:6px 0;align-items:center;}
+.typing span{width:6px;height:6px;background:rgba(0,255,209,.5);border-radius:50%;animation:typeDot 1.2s ease-in-out infinite;}
+.typing span:nth-child(2){animation-delay:.2s;}
+.typing span:nth-child(3){animation-delay:.4s;}
+@keyframes typeDot{0%,80%,100%{transform:scale(1);opacity:.5;}40%{transform:scale(1.3);opacity:1;}}
+
+/* ── RESPONSIVE ── */
+@media(max-width:768px){
+  nav{padding:16px 20px;}
+  .nav-links{display:none;}
+  .hero{padding:100px 20px 60px;}
+  .ring-wrap,.holo-orb,.data-lines,.hex-grid{display:none;}
+  .section,.why-section,.process-section,.testi-section{padding:60px 20px;}
+  .why-grid{grid-template-columns:1fr;}
+  .why-visual{display:none;}
+  .process-grid{grid-template-columns:1fr 1fr;gap:8px;}
+  .testi-grid{grid-template-columns:1fr;}
+  .hud-stats{padding:0 20px;flex-wrap:wrap;}
+  .hud-item{min-width:50%;border-right:none;border-bottom:1px solid rgba(0,255,209,.08);}
+  footer{padding:32px 20px;flex-direction:column;text-align:center;}
+  #assist-panel{width:calc(100vw - 24px);right:12px;}
+}
+</style>
+</head>
+<body>
+
+<!-- CURSOR -->
+<div id="cur"></div>
+<div id="cur-ring"></div>
+<div id="cur-cross-h"></div>
+<div id="cur-cross-v"></div>
+
+<!-- PARTICLE CANVAS -->
+<canvas id="particleCanvas"></canvas>
+
+<!-- NAV -->
+<nav>
+  <div class="logo">RURAL MILK</div>
+  <ul class="nav-links">
+    <li><a href="#products">Products</a></li>
+    <li><a href="#why">Farm Lab</a></li>
+    <li><a href="#how">Protocol</a></li>
+  </ul>
+  <button class="nav-cta" onclick="openAssist()">INITIALISE ORDER</button>
+</nav>
+
+<!-- HERO -->
+<section class="hero">
+  <div class="hex-grid"></div>
+  <div class="holo-orb orb1"></div>
+  <div class="holo-orb orb2"></div>
+
+  <div class="ring-wrap">
+    <div class="holo-ring"></div>
+    <div class="holo-ring"></div>
+    <div class="holo-ring"></div>
+    <div class="milk-holo">
+      <svg viewBox="0 0 120 150" fill="none">
+        <defs>
+          <linearGradient id="dg" x1="0" y1="0" x2="0" y2="1">
+            <stop offset="0%" stop-color="#00FFD1" stop-opacity="0.6"/>
+            <stop offset="100%" stop-color="#C8943A" stop-opacity="0.3"/>
+          </linearGradient>
+        </defs>
+        <path d="M60 8C60 8 15 68 15 100a45 45 0 0090 0C105 68 60 8 60 8z" fill="url(#dg)" stroke="rgba(0,255,209,0.7)" stroke-width="1"/>
+        <path d="M60 38C60 38 33 78 33 98a27 27 0 0054 0C87 78 60 38 60 38z" fill="rgba(0,255,209,0.08)"/>
+        <ellipse cx="46" cy="72" rx="7" ry="12" fill="rgba(255,255,255,0.15)" transform="rotate(-20,46,72)"/>
+        <line x1="40" y1="50" x2="80" y2="50" stroke="rgba(0,255,209,0.2)" stroke-width="0.5"/>
+        <line x1="32" y1="70" x2="88" y2="70" stroke="rgba(0,255,209,0.15)" stroke-width="0.5"/>
+        <line x1="28" y1="90" x2="92" y2="90" stroke="rgba(0,255,209,0.12)" stroke-width="0.5"/>
+      </svg>
+      <div class="milk-holo-scan"></div>
+    </div>
+  </div>
+
+  <div class="data-lines">
+    <div class="data-line">FAT CONTENT: 3.8%</div>
+    <div class="data-line" style="animation-delay:.4s">PROTEIN: 3.2g/100ml</div>
+    <div class="data-line" style="animation-delay:.8s">COLLECTED: 04:12 AM</div>
+    <div class="data-line" style="animation-delay:1.2s">TEMP: 4°C</div>
+    <div class="data-line" style="animation-delay:1.6s">STATUS: VERIFIED ✓</div>
+  </div>
+
+  <div class="hero-content">
+    <div class="hero-tag"><span class="tag-dot"></span>FARM NETWORK ONLINE · EST. 1994</div>
+    <h1 class="hero-title">
+      <span class="line1">PURE MILK</span>
+      <span class="line2 glitch" data-text="REDEFINED">REDEFINED</span>
+      <span class="line3">from the heart of the farm</span>
+    </h1>
+    <p class="hero-sub">Next-generation dairy delivery. Zero intermediaries. Quantum-fresh every morning. Straight from our smart farm network to your door by 06:00 hours.</p>
+    <div class="hero-btns">
+      <button class="btn-primary" onclick="openAssist()">INITIATE ORDER</button>
+      <button class="btn-ghost" onclick="document.getElementById('products').scrollIntoView()">VIEW PRODUCTS</button>
+    </div>
+  </div>
+
+  <div class="scroll-hint">
+    <div class="scroll-pulse"></div>
+    SCROLL TO EXPLORE
+  </div>
+</section>
+
+<!-- HUD STATS -->
+<div class="hud-stats">
+  <div class="hud-item">
+    <span class="hud-val" id="cnt1">0</span>
+    <span class="hud-label">Active Households</span>
+  </div>
+  <div class="hud-item">
+    <span class="hud-val">30</span>
+    <span class="hud-label">Years of Trust</span>
+  </div>
+  <div class="hud-item">
+    <span class="hud-val">06:00</span>
+    <span class="hud-label">Daily Delivery</span>
+  </div>
+  <div class="hud-item">
+    <span class="hud-val">0%</span>
+    <span class="hud-label">Preservatives</span>
+  </div>
+  <div class="hud-item">
+    <span class="hud-val" id="cnt2">0</span>
+    <span class="hud-label">Litres Delivered Today</span>
+  </div>
+</div>
+
+<!-- PRODUCTS -->
+<section class="section" id="products">
+  <div class="s-tag">Product Matrix</div>
+  <h2 class="s-title">SELECT YOUR <em>Formula</em></h2>
+  <div class="products-grid">
+
+    <div class="p-card">
+      <div class="corner tl"></div><div class="corner tr"></div>
+      <div class="corner bl"></div><div class="corner br"></div>
+      <div class="p-badge">BESTSELLER</div>
+      <div class="p-icon">🥛</div>
+      <div class="p-name">FULL CREAM</div>
+      <div class="p-desc">Rich natural creamline. Maximum fat content, full flavour profile. Ideal for chai, desserts and daily nutrition.</div>
+      <div class="p-price"><sup>₹</sup>65<sub>/litre</sub></div>
+      <button class="btn-add" onclick="assistOrder('Full Cream Milk at ₹65/L')"><span>+ ADD TO ORDER</span></button>
+    </div>
+
+    <div class="p-card">
+      <div class="corner tl"></div><div class="corner tr"></div>
+      <div class="corner bl"></div><div class="corner br"></div>
+      <div class="p-icon">✨</div>
+      <div class="p-name">TONED FORMULA</div>
+      <div class="p-desc">Reduced fat, full nutrition matrix. Engineered for health-conscious consumption. Perfect protein balance.</div>
+      <div class="p-price"><sup>₹</sup>52<sub>/litre</sub></div>
+      <button class="btn-add" onclick="assistOrder('Toned Milk at ₹52/L')"><span>+ ADD TO ORDER</span></button>
+    </div>
+
+    <div class="p-card">
+      <div class="corner tl"></div><div class="corner tr"></div>
+      <div class="corner bl"></div><div class="corner br"></div>
+      <div class="p-badge">PREMIUM</div>
+      <div class="p-icon">🧬</div>
+      <div class="p-name">A2 GIR COW</div>
+      <div class="p-desc">Pure A2 beta-casein protein from heritage Gir breed. Traditional collection. Zero processing. Maximum bioavailability.</div>
+      <div class="p-price"><sup>₹</sup>95<sub>/litre</sub></div>
+      <button class="btn-add" onclick="assistOrder('A2 Gir Cow Milk at ₹95/L')"><span>+ ADD TO ORDER</span></button>
+    </div>
+
+    <div class="p-card">
+      <div class="corner tl"></div><div class="corner tr"></div>
+      <div class="corner bl"></div><div class="corner br"></div>
+      <div class="p-icon">🌿</div>
+      <div class="p-name">BUFFALO SERIES</div>
+      <div class="p-desc">Naturally dense. High fat content, rich sweet profile. Optimised for paneer, kheer and traditional recipes.</div>
+      <div class="p-price"><sup>₹</sup>78<sub>/litre</sub></div>
+      <button class="btn-add" onclick="assistOrder('Buffalo Milk at ₹78/L')"><span>+ ADD TO ORDER</span></button>
+    </div>
+
+  </div>
+</section>
+
+<!-- WHY -->
+<section class="why-section" id="why">
+  <div class="why-bg-text">PURE</div>
+  <div class="s-tag">Farm Intelligence</div>
+  <h2 class="s-title">THE RURAL MILK <em>Advantage</em></h2>
+  <div class="why-grid">
+    <div class="why-visual">
+      <div class="radar">
+        <div class="radar-ring rr1"></div>
+        <div class="radar-ring rr2"></div>
+        <div class="radar-ring rr3"></div>
+        <div class="radar-ring rr4"></div>
+        <div class="radar-cross"></div>
+        <div class="radar-sweep">
+          <div class="sweep-glow"></div>
+          <div class="sweep-arm"></div>
+        </div>
+        <div class="radar-dot rd1"></div>
+        <div class="radar-dot rd2"></div>
+        <div class="radar-dot rd3"></div>
+      </div>
+    </div>
+    <div class="why-items">
+      <div class="why-item">
+        <div class="wi-num">01</div>
+        <div class="wi-body">
+          <h3>Direct Farm Network</h3>
+          <p>No middlemen. No cold-chain markup. Our owned farm connects directly to your delivery zone. Freshness verified at source.</p>
+        </div>
+      </div>
+      <div class="why-item">
+        <div class="wi-num">02</div>
+        <div class="wi-body">
+          <h3>04:00 AM Collection · 06:00 AM Delivery</h3>
+          <p>Milk collected before dawn and dispatched immediately. Temperature-locked throughout. Arrives cold, every morning, 365 days.</p>
+        </div>
+      </div>
+      <div class="why-item">
+        <div class="wi-num">03</div>
+        <div class="wi-body">
+          <h3>Zero Additives Protocol</h3>
+          <p>No preservatives, stabilisers, or enhancement agents. Ever. What leaves the animal goes directly into your bottle. That is our guarantee.</p>
+        </div>
+      </div>
+      <div class="why-item">
+        <div class="wi-num">04</div>
+        <div class="wi-body">
+          <h3>Quality Verified · Batch Tracked</h3>
+          <p>Every batch lab-tested for fat, protein, and purity. Full traceability from our farm to your doorstep.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- HOW IT WORKS -->
+<section class="process-section" id="how">
+  <div class="s-tag">Order Protocol</div>
+  <h2 class="s-title">HOW IT <em>Works</em></h2>
+  <div class="process-grid">
+    <div class="proc-step">
+      <div class="proc-num">STEP · 01</div>
+      <span class="proc-icon">💬</span>
+      <div class="proc-title">CHAT WITH DAISY</div>
+      <div class="proc-desc">Launch the AI assistant. She will guide you through every step of your order setup.</div>
+    </div>
+    <div class="proc-step">
+      <div class="proc-num">STEP · 02</div>
+      <span class="proc-icon">🧬</span>
+      <div class="proc-title">SELECT FORMULA</div>
+      <div class="proc-desc">Pick your milk type and daily quantity. Set subscription frequency — daily, alternate, or weekly.</div>
+    </div>
+    <div class="proc-step">
+      <div class="proc-num">STEP · 03</div>
+      <span class="proc-icon">📡</span>
+      <div class="proc-title">LOCK IN LOCATION</div>
+      <div class="proc-desc">Share your delivery address. Our network pings your zone for coverage and confirms your 6AM slot.</div>
+    </div>
+    <div class="proc-step">
+      <div class="proc-num">STEP · 04</div>
+      <span class="proc-icon">🥛</span>
+      <div class="proc-title">DELIVERED 06:00</div>
+      <div class="proc-desc">Wake up to fresh, cold milk at your door. WhatsApp confirmation sent. Every. Single. Morning.</div>
+    </div>
+  </div>
+</section>
+
+<!-- TESTIMONIALS -->
+<section class="testi-section">
+  <div class="s-tag">Field Reports</div>
+  <h2 class="s-title">VERIFIED <em>Reviews</em></h2>
+  <div class="testi-grid">
+    <div class="testi-card">
+      <div class="testi-stars">★★★★★</div>
+      <div class="testi-text">"Switched to Rural Milk two years ago. The cream layer every morning feels like a different product entirely. My kids actually ask for milk now."</div>
+      <div class="testi-name">PRIYA SHARMA</div>
+      <div class="testi-loc">LUCKNOW · VERIFIED CUSTOMER</div>
+    </div>
+    <div class="testi-card">
+      <div class="testi-stars">★★★★★</div>
+      <div class="testi-text">"The A2 Gir Cow milk is genuinely different. Father's digestion improved within weeks. Never late, never missing. This is how dairy should work."</div>
+      <div class="testi-name">RAHUL VERMA</div>
+      <div class="testi-loc">PRAYAGRAJ · VERIFIED CUSTOMER</div>
+    </div>
+    <div class="testi-card">
+      <div class="testi-stars">★★★★★</div>
+      <div class="testi-text">"Ordered through the chat assistant in 3 minutes flat. Next morning — there it was. The whole experience feels like the future of dairy."</div>
+      <div class="testi-name">MEENA AGARWAL</div>
+      <div class="testi-loc">VARANASI · VERIFIED CUSTOMER</div>
+    </div>
+  </div>
+</section>
+
+<!-- FOOTER -->
+<footer>
+  <div class="f-logo">RURAL MILK</div>
+  <div class="f-links">
+    <a href="#">Privacy</a>
+    <a href="#">Terms</a>
+    <a href="#">Contact</a>
+  </div>
+  <div class="f-copy">© 2025 RURAL MILK · PURE FROM THE FARM</div>
+</footer>
+
+<!-- ASSISTANT -->
+<button id="assist-btn" onclick="toggleAssist()">🐄</button>
+
+<div id="assist-panel">
+  <div class="a-head">
+    <div class="a-avatar">🐄</div>
+    <div>
+      <div class="a-name">DAISY — MILK AI</div>
+      <div class="a-status"><span class="a-dot"></span>SYSTEM ONLINE · READY</div>
+    </div>
+  </div>
+  <div class="a-msgs" id="aMsgs"></div>
+  <div class="a-chips" id="aChips"></div>
+  <div class="a-input-row">
+    <input class="a-input" id="aInput" placeholder="Type your query..." onkeydown="if(event.key==='Enter')sendMsg()"/>
+    <button class="a-send" onclick="sendMsg()">➤</button>
+  </div>
+</div>
+
+<script>
+/* ── CURSOR ── */
+const cur=document.getElementById('cur'),ring=document.getElementById('cur-ring');
+const ch=document.getElementById('cur-cross-h'),cv=document.getElementById('cur-cross-v');
+let mx=0,my=0,rx=0,ry=0;
+document.addEventListener('mousemove',e=>{
+  mx=e.clientX;my=e.clientY;
+  cur.style.transform=`translate(${mx-5}px,${my-5}px)`;
+  ch.style.transform=`translate(${mx-25}px,${my-.5}px)`;
+  cv.style.transform=`translate(${mx-.5}px,${my-25}px)`;
+});
+(function animRing(){
+  rx+=(mx-rx)*.1;ry+=(my-ry)*.1;
+  ring.style.transform=`translate(${rx-17}px,${ry-17}px)`;
+  requestAnimationFrame(animRing);
+})();
+
+/* ── PARTICLE CANVAS ── */
+const canvas=document.getElementById('particleCanvas');
+const ctx=canvas.getContext('2d');
+let W,H,particles=[];
+function resize(){W=canvas.width=window.innerWidth;H=canvas.height=window.innerHeight;}
+resize();window.addEventListener('resize',resize);
+
+class Particle{
+  constructor(){this.reset();}
+  reset(){
+    this.x=Math.random()*W;
+    this.y=Math.random()*H;
+    this.vx=(Math.random()-.5)*.3;
+    this.vy=(Math.random()-.5)*.3;
+    this.r=Math.random()*1.5+.3;
+    this.life=Math.random();
+    this.maxLife=Math.random()*.8+.2;
+    this.color=Math.random()<.6?'rgba(0,255,209,':'rgba(200,148,58,';
+  }
+  update(){
+    this.x+=this.vx;this.y+=this.vy;
+    this.life+=.003;
+    if(this.life>this.maxLife||this.x<0||this.x>W||this.y<0||this.y>H)this.reset();
+  }
+  draw(){
+    const a=Math.sin((this.life/this.maxLife)*Math.PI)*.6;
+    ctx.beginPath();
+    ctx.arc(this.x,this.y,this.r,0,Math.PI*2);
+    ctx.fillStyle=this.color+a+')';
+    ctx.fill();
+  }
+}
+
+for(let i=0;i<120;i++)particles.push(new Particle());
+
+/* connection lines */
+function drawConnections(){
+  for(let i=0;i<particles.length;i++){
+    for(let j=i+1;j<particles.length;j++){
+      const dx=particles[i].x-particles[j].x,dy=particles[i].y-particles[j].y;
+      const d=Math.sqrt(dx*dx+dy*dy);
+      if(d<100){
+        const a=(1-d/100)*.08;
+        ctx.beginPath();
+        ctx.moveTo(particles[i].x,particles[i].y);
+        ctx.lineTo(particles[j].x,particles[j].y);
+        ctx.strokeStyle=`rgba(0,255,209,${a})`;
+        ctx.lineWidth=.5;
+        ctx.stroke();
+      }
+    }
+  }
+}
+
+/* mouse attract */
+let pmx=W/2,pmy=H/2;
+document.addEventListener('mousemove',e=>{pmx=e.clientX;pmy=e.clientY;});
+
+function animParticles(){
+  ctx.clearRect(0,0,W,H);
+  particles.forEach(p=>{
+    const dx=pmx-p.x,dy=pmy-p.y,d=Math.sqrt(dx*dx+dy*dy);
+    if(d<200){p.vx+=dx/d*.008;p.vy+=dy/d*.008;}
+    p.vx*=.99;p.vy*=.99;
+    p.update();p.draw();
+  });
+  drawConnections();
+  requestAnimationFrame(animParticles);
+}
+animParticles();
+
+/* ── COUNTER ANIMATION ── */
+function animCount(el,target,dur){
+  const start=performance.now();
+  function upd(now){
+    const p=Math.min((now-start)/dur,1);
+    el.textContent=Math.floor(p*target).toLocaleString();
+    if(p<1)requestAnimationFrame(upd);
+  }
+  requestAnimationFrame(upd);
+}
+setTimeout(()=>{
+  animCount(document.getElementById('cnt1'),2400,1800);
+  animCount(document.getElementById('cnt2'),4800,2200);
+},500);
+
+/* ── ASSISTANT ── */
+let isOpen=false;
+const panel=document.getElementById('assist-panel');
+const aMsgs=document.getElementById('aMsgs');
+const aChips=document.getElementById('aChips');
+
+const flow=[
+  {id:'start',bot:"SYSTEM INITIALISED. I'm Daisy 🐄 — your Rural Milk AI guide. How can I assist you today?",chips:['Order milk','View prices','Delivery info','Contact farm']},
+  {id:'order',bot:"ORDER PROTOCOL INITIATED. Select your milk formula:",chips:['Full Cream ₹65/L','Toned ₹52/L','A2 Gir Cow ₹95/L','Buffalo ₹78/L']},
+  {id:'qty',bot:"FORMULA LOCKED. Specify daily quantity:",chips:['0.5 litre','1 litre','2 litres','3+ litres']},
+  {id:'freq',bot:"QUANTITY SET. Select delivery frequency:",chips:['Daily subscription','Alternate days','Weekly','One-time order']},
+  {id:'addr',bot:"FREQUENCY CONFIRMED. Transmit your delivery address to complete the order setup:",chips:[]},
+  {id:'done',bot:"ORDER CONFIRMED ✓ Fresh milk will be at your door by 06:00 hours. WhatsApp confirmation incoming. Thank you for choosing Rural Milk!",chips:['Order more','Start over']},
+  {id:'prices',bot:"PRICE MATRIX:\n• Full Cream — ₹65/litre\n• Toned Milk — ₹52/litre\n• A2 Gir Cow — ₹95/litre\n• Buffalo Milk — ₹78/litre\nAll deliveries are free.",chips:['Order now','Delivery info']},
+  {id:'delivery',bot:"DELIVERY NETWORK: Prayagraj · Lucknow · Varanasi. All orders delivered by 06:00 AM. Minimum 0.5L. Zero delivery charges.",chips:['Order now','View prices']},
+  {id:'contact',bot:"CONTACT CHANNEL: WhatsApp +91-98765-43210. Available 08:00–20:00 daily. We respond within minutes.",chips:['Order milk','Start over']},
+];
+
+function getStep(id){return flow.find(f=>f.id===id);}
+function showMsg(text,who){
+  const d=document.createElement('div');
+  d.className=`msg ${who}`;d.textContent=text;
+  aMsgs.appendChild(d);aMsgs.scrollTop=aMsgs.scrollHeight;
+}
+function showTyping(){
+  const t=document.createElement('div');
+  t.className='msg bot';t.id='typingDot';
+  t.innerHTML='<div class="typing"><span></span><span></span><span></span></div>';
+  aMsgs.appendChild(t);aMsgs.scrollTop=aMsgs.scrollHeight;
+}
+function removeTyping(){const t=document.getElementById('typingDot');if(t)t.remove();}
+
+function showChips(list){
+  aChips.innerHTML='';
+  list.forEach(label=>{
+    const c=document.createElement('button');
+    c.className='chip';c.textContent=label;
+    c.onclick=()=>chipClick(label);
+    aChips.appendChild(c);
+  });
+}
+
+function reply(id){
+  showTyping();
+  setTimeout(()=>{
+    removeTyping();
+    const s=getStep(id);if(!s)return;
+    showMsg(s.bot,'bot');showChips(s.chips);
+  },600);
+}
+
+function chipClick(label){
+  showMsg(label,'user');aChips.innerHTML='';
+  const l=label.toLowerCase();
+  setTimeout(()=>{
+    if(l.includes('order')||l.includes('order milk'))reply('order');
+    else if(l.includes('price')||l.includes('matrix'))reply('prices');
+    else if(l.includes('delivery')||l.includes('network'))reply('delivery');
+    else if(l.includes('contact')||l.includes('farm'))reply('contact');
+    else if(l.includes('start'))reply('start');
+    else if(l.includes('full cream')||l.includes('toned')||l.includes('a2')||l.includes('buffalo'))reply('qty');
+    else if(l.includes('litre'))reply('freq');
+    else if(l.includes('daily')||l.includes('alternate')||l.includes('weekly')||l.includes('one-time'))reply('addr');
+    else if(l.includes('more'))reply('order');
+    else reply('addr');
+  },350);
+}
+
+function sendMsg(){
+  const inp=document.getElementById('aInput');
+  const val=inp.value.trim();if(!val)return;
+  showMsg(val,'user');inp.value='';aChips.innerHTML='';
+  setTimeout(()=>{
+    const v=val.toLowerCase();
+    if(v.includes('order')||v.includes('buy'))reply('order');
+    else if(v.includes('price')||v.includes('cost')||v.includes('rate')||v.includes('₹'))reply('prices');
+    else if(v.includes('deliver')||v.includes('time')||v.includes('when')||v.includes('6am'))reply('delivery');
+    else if(v.match(/\d{6}/)||v.includes('address')||v.includes('sector')||v.includes('nagar')||v.includes('road'))reply('done');
+    else if(v.includes('contact')||v.includes('whatsapp')||v.includes('call')||v.includes('number'))reply('contact');
+    else{
+      showTyping();
+      setTimeout(()=>{
+        removeTyping();
+        showMsg("I can help with orders, pricing, delivery info, or connect you with the farm. Pick an option:","bot");
+        showChips(['Order milk','View prices','Delivery info','Contact farm']);
+      },600);
+    }
+  },400);
+}
+
+function toggleAssist(){
+  isOpen=!isOpen;
+  panel.classList.toggle('open',isOpen);
+  if(isOpen&&aMsgs.children.length===0)setTimeout(()=>reply('start'),300);
+}
+function openAssist(){
+  isOpen=true;panel.classList.add('open');
+  if(aMsgs.children.length===0)setTimeout(()=>reply('start'),300);
+}
+function assistOrder(product){
+  openAssist();
+  setTimeout(()=>{
+    showMsg(`I want to order: ${product}`,'user');
+    setTimeout(()=>reply('qty'),400);
+  },500);
+}
+</script>
+</body>
+</html>
